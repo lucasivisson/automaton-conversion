@@ -83,10 +83,13 @@ def build_afd(automaton, e_closures):
     if any(state in automaton['final_states'] for state in afd_state):
       afd_final_states.append(afd_state)
 
+  symbols = [symbol for symbol in automaton['symbols'] if symbol != 'vazio']
+  
   # return AFD
   return {
     'states': list(afd_states),
-    'symbols': automaton['symbols'],
+    'symbols': symbols,
+    # automaton['symbols'] 
     'transitions': afd_transitions,
     'start_state': start_state,
     'final_states': afd_final_states,
@@ -122,17 +125,35 @@ def create_afd_with_one_final_state(afd):
     afd_transitions[(final_state, new_symbol)] = 'qf'
 
   return {
-    'states': states,
-    'symbols': symbols,
+    'states': list(states),
+    'symbols': list(symbols),
     'transitions': afd_transitions,
     'start_state': afd['start_state'],
     'final_states': new_final_state,
   }
 
-def build_reverse_afd(afd):
-  if len(afd['final_states']) > 1:
-    a = create_afd_with_one_final_state(afd)
-    print(a)
+def build_reverse_afd(af):
+  if len(af['final_states']) > 1:
+    afn_with_one_final_state = create_afd_with_one_final_state(afd)
+    # print('afn_with_one_final_state', afn_with_one_final_state)
+  if afn_with_one_final_state:
+    af = afn_with_one_final_state
+
+  print('afn_with_one_final_state', afn_with_one_final_state)
+
+  af_transitions = {}
+  for (state, symbol), next_state in af['transitions'].items():
+    # af_transitions[(next_state, symbol)] = state
+    af_transitions.setdefault((next_state, symbol), []).append(state)
+
+  return {
+    'states': af['states'],
+    'symbols': af['symbols'],
+    'transitions': af_transitions,
+    'start_state': af['final_states'],
+    'final_states': af['start_state'],
+  }
+  
 
 
 
@@ -141,7 +162,7 @@ e_closures = build_e_closure(automaton)
 afd = build_afd(automaton, e_closures)
 afd_complement = build_afd_complement(afd)
 reverse_afd = build_reverse_afd(afd)
-# print('afd_complement', afd_complement)
-# print(automaton)
+# print('afd', afd)
+print('reverse_afd', reverse_afd)
 # print(afd)
 
