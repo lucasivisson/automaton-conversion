@@ -49,7 +49,7 @@ def build_afd(automaton, e_closures):
   unprocessed_states = [start_state]  # pending process states
   afd_final_states = []  # final AFD states
 
-  # process afd statess
+  # process afd states
   while unprocessed_states:
     current_state = unprocessed_states.pop(0)  # current unprocessed state
     
@@ -92,9 +92,56 @@ def build_afd(automaton, e_closures):
     'final_states': afd_final_states,
   }
 
+def build_afd_complement(afd):
+  afd_final_states = []
+  for state in afd['states']:
+    if state not in afd['final_states']:
+      afd_final_states.append(state)
+  
+  return {
+    'states': afd['states'],
+    'symbols': afd['symbols'],
+    'transitions': afd['transitions'],
+    'start_state': afd['start_state'],
+    'final_states': afd_final_states,
+  }
+
+def create_afd_with_one_final_state(afd):
+  new_final_state = tuple(['qf'])
+  states = set(afd['states'])
+  states.add(new_final_state)
+
+  new_symbol = 'vazio'
+  symbols = set(afd['symbols'])
+  symbols.add(new_symbol)
+
+  afd_transitions = {}
+  afd_transitions.update(afd['transitions'])
+
+  for final_state in afd['final_states']:
+    afd_transitions[(final_state, new_symbol)] = 'qf'
+
+  return {
+    'states': states,
+    'symbols': symbols,
+    'transitions': afd_transitions,
+    'start_state': afd['start_state'],
+    'final_states': new_final_state,
+  }
+
+def build_reverse_afd(afd):
+  if len(afd['final_states']) > 1:
+    a = create_afd_with_one_final_state(afd)
+    print(a)
+
+
+
 automaton = parse_automaton('afn.txt')
 e_closures = build_e_closure(automaton)
 afd = build_afd(automaton, e_closures)
-print(automaton)
-print(afd)
+afd_complement = build_afd_complement(afd)
+reverse_afd = build_reverse_afd(afd)
+# print('afd_complement', afd_complement)
+# print(automaton)
+# print(afd)
 
