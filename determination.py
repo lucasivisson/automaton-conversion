@@ -54,9 +54,6 @@ def build_afd(automaton, e_closures):
     current_state = unprocessed_states.pop(0)  # current unprocessed state
     
     for symbol in automaton['symbols']:
-      if symbol == 'vazio':  # ignore void transitions
-        continue
-
       # find and save reachable states by symbol
       reachable = set()
       for sub_state in current_state:
@@ -82,14 +79,11 @@ def build_afd(automaton, e_closures):
     # Is a final state if final AFN state is in any of AFD state 
     if any(state in automaton['final_states'] for state in afd_state):
       afd_final_states.append(afd_state)
-
-  symbols = [symbol for symbol in automaton['symbols'] if symbol != 'vazio']
   
   # return AFD
   return {
     'states': list(afd_states),
-    'symbols': symbols,
-    # automaton['symbols'] 
+    'symbols': automaton['symbols'] ,
     'transitions': afd_transitions,
     'start_state': start_state,
     'final_states': afd_final_states,
@@ -114,19 +108,15 @@ def create_afd_with_one_final_state(afd):
   states = set(afd['states'])
   states.add(new_final_state)
 
-  new_symbol = 'vazio'
-  symbols = set(afd['symbols'])
-  symbols.add(new_symbol)
-
   afd_transitions = {}
   afd_transitions.update(afd['transitions'])
 
   for final_state in afd['final_states']:
-    afd_transitions[(final_state, new_symbol)] = 'qf'
+    afd_transitions[(final_state, 'vazio')] = 'qf'
 
   return {
     'states': list(states),
-    'symbols': list(symbols),
+    'symbols': afd['symbols'],
     'transitions': afd_transitions,
     'start_state': afd['start_state'],
     'final_states': new_final_state,

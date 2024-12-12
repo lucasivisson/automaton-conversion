@@ -1,5 +1,5 @@
 states = q0, q1, q2
-symbols = 0, 1, vazio
+symbols = 0, 1
 transition = {
 (q0, 0) -> q0
 (q0, 1) -> q0
