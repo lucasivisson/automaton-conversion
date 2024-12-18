@@ -1,4 +1,4 @@
-states = ('q0',), ('q0', 'q2'), ('q0', 'q1', 'q2')
+states = ('q0', 'q1', 'q2'), ('q0', 'q2'), ('q0',)
 symbols = 0, 1
 transitions = {
 (('q0',), 0) -> ('q0',)
@@ -9,4 +9,4 @@ transitions = {
 (('q0', 'q2'), 1) -> ('q0', 'q1', 'q2')
 }
 start_state = ('q0',)
-final_states = [('q0', 'q2'), ('q0', 'q1', 'q2')]
+final_states = [('q0', 'q1', 'q2'), ('q0', 'q2')]

@@ -197,5 +197,9 @@ save_automaton_to_file(afd_complement, "COMP.txt", include_input_string=False)
 save_automaton_to_file(reverse_afd, "REV.txt", include_input_string=False)
 
 input_string = automaton['input_string']
-is_accepted = simulate_afd(afd, input_string)
-print(f"A cadeia '{input_string}' foi {'ACEITA' if is_accepted else 'REJEITADA'} pelo AFD.")
+is_accepted_afd = simulate_afd(afd, input_string)
+is_accepted_complement = simulate_afd(afd_complement, input_string)
+is_accepted_reverse = simulate_afd(reverse_afd, input_string)
+print(f"A cadeia '{input_string}' foi {'ACEITA' if is_accepted_afd else 'REJEITADA'} pelo AFD.")
+print(f"A cadeia '{input_string}' foi {'ACEITA' if is_accepted_complement else 'REJEITADA'} pelo Complemento do AFD.")
+print(f"A cadeia '{input_string}' foi {'ACEITA' if is_accepted_reverse else 'REJEITADA'} pelo Reverso do AFD.")

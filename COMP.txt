@@ -1,4 +1,4 @@
-states = ('q0',), ('q0', 'q2'), ('q0', 'q1', 'q2')
+states = ('q0', 'q1', 'q2'), ('q0', 'q2'), ('q0',)
 symbols = 0, 1
 transitions = {
 (('q0',), 0) -> ('q0',)
