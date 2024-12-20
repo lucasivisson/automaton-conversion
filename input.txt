@@ -9,4 +9,3 @@ transition = {
 }
 start_state = q0
 final_states = q2
-w = 10001

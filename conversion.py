@@ -26,12 +26,12 @@ def parse_automaton(file_path):
       # transitions.setdefault((current, symbol), []).append(next_states_list)
   automaton['transitions'] = transitions
   # add start_state to automaton
-  automaton['start_state'] = lines[-3].split('=')[1].strip()
+  automaton['start_state'] = lines[-2].split('=')[1].strip()
   # add final_states to automaton
-  automaton['final_states'] = re.findall(r'\b\w+\b', lines[-2].split('=')[1])
+  automaton['final_states'] = re.findall(r'\b\w+\b', lines[-1].split('=')[1])
 
-  word_line = next(line for line in lines if line.startswith("w ="))
-  automaton['input_string'] = word_line.split("=")[1].strip()
+  # word_line = next(line for line in lines if line.startswith("w ="))
+  # automaton['input_string'] = word_line.split("=")[1].strip()
   return automaton
 
 def build_e_closure(automaton):
@@ -99,11 +99,15 @@ def build_afd(automaton, e_closures):
   }
 
 def build_afd_complement(afd):
+  # Create an empty list to store the final states of the complement AFD
   afd_final_states = []
+  # If the state is not in the final states of the original AFD, add it to the complement's final states
   for state in afd['states']:
     if state not in afd['final_states']:
       afd_final_states.append(state)
   
+  # Return a new AFD with the same states, symbols, and transitions,
+  # but with the final states replaced by the complement of the original final states
   return {
     'states': afd['states'],
     'symbols': afd['symbols'],
@@ -113,16 +117,22 @@ def build_afd_complement(afd):
   }
 
 def create_afd_with_one_final_state(afd):
+  # Create a new final state called 'qf' (a unique state representing the single final state)
   new_final_state = tuple(['qf'])
+
+  # Add the new final state to the set of states in the AFD
   states = set(afd['states'])
   states.add(new_final_state)
 
+  # Create a copy of the AFD's transitions
   afd_transitions = {}
   afd_transitions.update(afd['transitions'])
 
+  # For each final state in the original AFD, add a transition from the final state to the new final state with epsilon
   for final_state in afd['final_states']:
-    afd_transitions[(final_state, 'vazio')] = 'qf'
+    afd_transitions[(final_state, 'vazio')] = new_final_state
 
+  # Return a new AFD with the new final state and updated transitions
   return {
     'states': list(states),
     'symbols': afd['symbols'],
@@ -132,15 +142,18 @@ def create_afd_with_one_final_state(afd):
   }
 
 def build_reverse_afd(af):
+  # Check if there are multiple final states, and if so, convert the AFD to an AFN with one final state
   if len(af['final_states']) > 1:
-    afn_with_one_final_state = create_afd_with_one_final_state(af)
-  if afn_with_one_final_state:
-    af = afn_with_one_final_state
+    af = create_afd_with_one_final_state(af)
 
+  # Create an empty dictionary to store the reversed transitions
   af_transitions = {}
+  # Loop through each transition in the original AFD, reversing the direction
   for (state, symbol), next_state in af['transitions'].items():
+    # Reverse the transition by swapping the state and next_state
     af_transitions.setdefault((next_state, symbol), []).append(state)
 
+  # Return the reversed AFD
   return {
     'states': af['states'],
     'symbols': af['symbols'],
@@ -149,22 +162,37 @@ def build_reverse_afd(af):
     'final_states': [af['start_state']],
   }
   
-def simulate_afd(afd, input_string):
-    current_state = afd['start_state']
+def simulate_afd(af, input_string):
+    # Set the initial state to the start state of the AFD
+    current_state = af['start_state']
+
+    # Process each symbol in the input string
     for symbol in input_string:
+        # Create a transition key by pairing the current state and the symbol
         transition_key = (current_state, symbol)
-        if transition_key in afd['transitions']:
-            current_state = afd['transitions'][transition_key]
+
+        # Check if a transition exists for the current state and symbol
+        if transition_key in af['transitions']:
+            # Update the current state to the next state based on the transition
+            current_state = af['transitions'][transition_key]
         else:
             return False
-    return current_state in afd['final_states']
+        
+    # After processing the entire input string, check if the final state is one of the AFD's final states
+    return current_state in af['final_states']
+       
 
-def save_automaton_to_file(automaton, file_name, include_input_string=True):
+def save_automaton_to_file(automaton, file_name):
     try:
+        # Get the directory path of the current script and build the full file path
         dir_path = os.path.dirname(os.path.abspath(__file__))
         full_file_path = os.path.join(dir_path, file_name)
+
+        # Create the directory if it does not exist
         if not os.path.exists(dir_path):
             os.makedirs(dir_path)
+
+        # Open the file in write mode and save the automaton's details
         with open(full_file_path, 'w', encoding='utf-8') as file:
             file.write(f"states = {', '.join(str(state) for state in automaton['states'])}\n")
             file.write(f"symbols = {', '.join(str(symbol) for symbol in automaton['symbols'])}\n")
@@ -178,28 +206,21 @@ def save_automaton_to_file(automaton, file_name, include_input_string=True):
             file.write(f"start_state = {automaton['start_state']}\n")
             file.write(f"final_states = {automaton['final_states']}\n")
             
-            if include_input_string:
-                file.write(f"w = {automaton['input_string']}\n")
-            
         print(f"Arquivo salvo: {full_file_path}")
     
     except Exception as e:
         print(f"Erro ao salvar o arquivo {file_name}: {e}")
 
-automaton = parse_automaton('AFN.txt')
+automaton = parse_automaton('input.txt')
 e_closures = build_e_closure(automaton)
 afd = build_afd(automaton, e_closures)
 afd_complement = build_afd_complement(afd)
-reverse_afd = build_reverse_afd(afd)
+af_reverse = build_reverse_afd(afd)
 
-save_automaton_to_file(afd, "AFD.txt", include_input_string=False)
-save_automaton_to_file(afd_complement, "COMP.txt", include_input_string=False)
-save_automaton_to_file(reverse_afd, "REV.txt", include_input_string=False)
+save_automaton_to_file(afd, "AFD.txt")
+save_automaton_to_file(afd_complement, "COMP.txt")
+save_automaton_to_file(af_reverse, "REV.txt")
 
-input_string = automaton['input_string']
-is_accepted_afd = simulate_afd(afd, input_string)
-is_accepted_complement = simulate_afd(afd_complement, input_string)
-is_accepted_reverse = simulate_afd(reverse_afd, input_string)
-print(f"A cadeia '{input_string}' foi {'ACEITA' if is_accepted_afd else 'REJEITADA'} pelo AFD.")
-print(f"A cadeia '{input_string}' foi {'ACEITA' if is_accepted_complement else 'REJEITADA'} pelo Complemento do AFD.")
-print(f"A cadeia '{input_string}' foi {'ACEITA' if is_accepted_reverse else 'REJEITADA'} pelo Reverso do AFD.")
+input_afd = '10001'
+is_accepted_afd = simulate_afd(afd, input_afd)
+print(f"A cadeia '{input_afd}' foi {'ACEITA' if is_accepted_afd else 'REJEITADA'} pelo AFD.")
