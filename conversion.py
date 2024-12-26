@@ -29,7 +29,7 @@ def parse_automaton(file_path):
   automaton['start_state'] = lines[-2].split('=')[1].strip()
   # add final_states to automaton
   automaton['final_states'] = re.findall(r'\b\w+\b', lines[-1].split('=')[1])
-  
+
   return automaton
 
 def build_e_closure(automaton):
@@ -219,6 +219,6 @@ save_automaton_to_file(afd, "AFD.txt")
 save_automaton_to_file(afd_complement, "COMP.txt")
 save_automaton_to_file(af_reverse, "REV.txt")
 
-input_afd = '10001'
-is_accepted_afd = simulate_afd(afd, input_afd)
-print(f"A cadeia '{input_afd}' foi {'ACEITA' if is_accepted_afd else 'REJEITADA'} pelo AFD.")
+input_string = '10001'
+is_accepted_afd = simulate_afd(afd, input_string)
+print(f"A cadeia '{input_string}' foi {'ACEITA' if is_accepted_afd else 'REJEITADA'} pelo AFD.")
