@@ -29,9 +29,7 @@ def parse_automaton(file_path):
   automaton['start_state'] = lines[-2].split('=')[1].strip()
   # add final_states to automaton
   automaton['final_states'] = re.findall(r'\b\w+\b', lines[-1].split('=')[1])
-
-  # word_line = next(line for line in lines if line.startswith("w ="))
-  # automaton['input_string'] = word_line.split("=")[1].strip()
+  
   return automaton
 
 def build_e_closure(automaton):
