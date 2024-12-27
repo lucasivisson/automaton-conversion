@@ -26,9 +26,11 @@ def parse_automaton(file_path):
       # transitions.setdefault((current, symbol), []).append(next_states_list)
   automaton['transitions'] = transitions
   # add start_state to automaton
-  automaton['start_state'] = lines[-2].split('=')[1].strip()
+  automaton['start_state'] = lines[-3].split('=')[1].strip()
   # add final_states to automaton
-  automaton['final_states'] = re.findall(r'\b\w+\b', lines[-1].split('=')[1])
+  automaton['final_states'] = re.findall(r'\b\w+\b', lines[-2].split('=')[1])
+  # add input_string to automaton
+  automaton['input_string'] = lines[-1].split('=')[1].strip()
 
   return automaton
 
@@ -215,10 +217,11 @@ afd = build_afd(automaton, e_closures)
 afd_complement = build_afd_complement(afd)
 af_reverse = build_reverse_afd(afd)
 
+save_automaton_to_file(automaton, "AFN.txt")
 save_automaton_to_file(afd, "AFD.txt")
 save_automaton_to_file(afd_complement, "COMP.txt")
 save_automaton_to_file(af_reverse, "REV.txt")
 
-input_string = '10001'
-is_accepted_afd = simulate_afd(afd, input_string)
+input_string = automaton['input_string']
+is_accepted_afd = simulate_afd(afd, automaton['input_string'])
 print(f"A cadeia '{input_string}' foi {'ACEITA' if is_accepted_afd else 'REJEITADA'} pelo AFD.")
